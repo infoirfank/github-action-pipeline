@@ -1,0 +1,51 @@
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'latest'
+
+      - name: Install dependencies
+        run: npm install
+
+  build:
+    runs-on: ubuntu-latest
+    needs: setup  # Ensure this job runs after the setup job
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build project
+        run: npm run build
+
+  test:
+    runs-on: ubuntu-latest
+    needs: setup  # Ensure this job runs after the setup job
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run tests
+        run: npm run lint  # Make sure to use 'npm run lint' instead of 'npm lint'
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, test]  # Ensure this job runs after both build and test jobs
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to AWS EC2
+        run: |
+          # Add your deployment script here
+          echo "Deploying to AWS EC2..."
+          # Example: scp or ssh commands to deploy your application
