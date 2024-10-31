@@ -4,7 +4,7 @@ import Link from 'next/link'
 export default function Home() {
   return (
     <main>
-      <h1>Hello, all users How are you?</h1>
+      <h1>Here all the users list</h1>
       <Link href="/users">Users</Link>
     </main>
   )
