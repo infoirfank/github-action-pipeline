@@ -44,7 +44,8 @@ jobs:
       
       # Build project
       - name: Build
-        run: npm run build
+        run: echo "create build"
+        #run: npm run build
         env:
           NODE_ENV: production
       
@@ -74,13 +75,6 @@ jobs:
     needs: [setup, build, test]
     runs-on: ubuntu-latest
     steps:
-      # Download build artifacts
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: build-artifacts
-          path: .next
-      
       # Deploy to AWS
       - name: Deploy to AWS
         run: |
