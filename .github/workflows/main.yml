@@ -1,45 +1,49 @@
-name: Deploy Next.js App to AWS EC2
+name: Deploy Next.js to AWS EC2
 
 on:
   push:
     branches:
-      - main  # Change this to your main branch if different
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '18'  # Specify your Node.js version
-
-
-      - name: Create SSH key
-        run: echo "${{ secrets.AWS_EC2_KEY }}" > nextapp.pem && chmod 400 nextapp.pem
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_EC2_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
       - name: Deploy to EC2
-        uses: appleboy/ssh-action@v0.1.2
-        with:
-          host: ${{ secrets.AWS_EC2_HOST }}  # Your EC2 instance public IP or DNS
-          username: ${{ secrets.AWS_EC2_USER }}  # Typically 'ubuntu' for Ubuntu instances
-          key: ${{ secrets.AWS_EC2_KEY }}  # The SSH key stored in GitHub Secrets
-          script: |
-            # Navigate to the deployment directory
+        env:
+          HOST: ${{ secrets.AWS_EC2_HOST }}
+          USER: ${{ secrets.AWS_EC2_USER }}
+          PORT: ${{ secrets.EC2_PORT || 22 }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -p $PORT $USER@$HOST << 'EOF'
+            # Navigate to the project directory (create if not present)
+            if [ ! -d "/home/ubuntu/my-next-app" ]; then
+              mkdir -p /home/ubuntu/my-next-app
+            fi
             cd /home/ubuntu/my-next-app
-            
-            # Pull the latest changes from the main branch
-            git pull origin main
-            
+
+            # Pull the latest changes
+            git init
+            git remote add origin https://github.com/infoirfank/github-action-pipeline.git || true
+            git fetch origin main
+            git reset --hard origin/main
+
             # Install dependencies
             npm install
-            
+
             # Build the application
             npm run build
-            
-            # Restart the application using PM2
-            pm2 restart all  # Ensure PM2 is installed and managing your app
+
+            # Start the Next.js application
+            npm run start
+          EOF
