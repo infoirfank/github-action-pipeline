@@ -45,5 +45,8 @@ jobs:
             npm run build
 
             # Start the Next.js application
-            npm run start
+              # Start or restart the app with PM2
+            pm2 start npm --name "my-next-app" -- start
+            pm2 save  # Save the process list
+            pm2 startup  # Generate startup script for server restarts
           EOF
