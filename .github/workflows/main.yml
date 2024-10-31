@@ -24,7 +24,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -p $PORT $USER@$HOST << 'EOF'
-          # Navigate to the project directory (create if not present)
+            # Navigate to the project directory (create if not present)
             if [ ! -d "/home/ubuntu/my-next-app" ]; then
               mkdir -p /home/ubuntu/my-next-app
             fi
