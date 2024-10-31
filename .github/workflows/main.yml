@@ -1,41 +1,88 @@
 name: Next.js CI/CD Pipeline
-
 on:
   push:
     branches: [main]
 
 jobs:
-  build-test-deploy:
+  setup:
     runs-on: ubuntu-latest
-
     steps:
       # Checkout repository
       - name: Checkout Repository
         uses: actions/checkout@v3
-
+      
       # Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "20"
           cache: "npm"
-
+      
       # Install dependencies
       - name: Install Dependencies
         run: npm install
+      
+      # Create artifact of node_modules and source code
+      - name: Create Project Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: project-artifacts
+          path: |
+            .
+            !.git
+          retention-days: 1
 
+  build:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      # Download previously created artifact
+      - name: Download Project Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: project-artifacts
+      
       # Build project
       - name: Build
         run: npm run build
         env:
           NODE_ENV: production
+      
+      # Upload build artifacts
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: .next
+          retention-days: 1
 
-      # Run tests
-      - name: Test
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      # Download project and build artifacts
+      - name: Download Project Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: project-artifacts
+      
+      # Run linting or tests
+      - name: Lint
         run: npm run lint
 
+  deploy:
+    needs: [setup, build, test]
+    runs-on: ubuntu-latest
+    steps:
+      # Download build artifacts
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: .next
+      
       # Deploy to AWS
       - name: Deploy to AWS
         run: |
-          echo "Deploying to AWS EC2..." 
-          npm run start
+          echo "Deploying to AWS EC2..."
+          # Add your deployment commands here
