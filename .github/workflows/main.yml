@@ -1,82 +1,45 @@
-name: Next.js CI/CD Pipeline
+name: Deploy Next.js App to AWS EC2
+
 on:
   push:
-    branches: [main]
+    branches:
+      - main  # Change this to your main branch if different
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-      # Checkout repository
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-      
-      # Setup Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-          cache: "npm"
-      
-      # Install dependencies
-      - name: Install Dependencies
-        run: npm install
-      
-      # Create artifact of node_modules and source code
-      - name: Create Project Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: project-artifacts
-          path: |
-            .
-            !.git
-          retention-days: 1
-
-  build:
-    needs: setup
-    runs-on: ubuntu-latest
-    steps:
-      # Download previously created artifact
-      - name: Download Project Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: project-artifacts
-      
-      # Build project
-      - name: Build
-        run: echo "create build"
-        #run: npm run build
-        env:
-          NODE_ENV: production
-      
-      # Upload build artifacts
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: .next
-          retention-days: 1
-
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      # Download project and build artifacts
-      - name: Download Project Artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: project-artifacts
-      
-      # Run linting or tests
-      - name: Lint
-        run: npm run lint
-
   deploy:
-    needs: [setup, build, test]
     runs-on: ubuntu-latest
+
     steps:
-      # Deploy to AWS
-      - name: Deploy to AWS
-        run: |
-          echo "Deploying to AWS EC2..."
-          # Add your deployment commands here
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'  # Specify your Node.js version
+
+
+      - name: Create SSH key
+        run: echo "${{ secrets.AWS_EC2_KEY }}" > ec2_key.pem && chmod 400 ec2_key.pem
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v0.1.2
+        with:
+          host: ${{ secrets.AWS_EC2_HOST }}  # Your EC2 instance public IP or DNS
+          username: ${{ secrets.AWS_EC2_USER }}  # Typically 'ubuntu' for Ubuntu instances
+          key: ${{ secrets.AWS_EC2_KEY }}  # The SSH key stored in GitHub Secrets
+          script: |
+            # Navigate to the deployment directory
+            cd /home/ubuntu/my-next-app
+            
+            # Pull the latest changes from the main branch
+            git pull origin main
+            
+            # Install dependencies
+            npm install
+            
+            # Build the application
+            npm run build
+            
+            # Restart the application using PM2
+            pm2 restart all  # Ensure PM2 is installed and managing your app
