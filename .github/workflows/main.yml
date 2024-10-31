@@ -61,6 +61,6 @@ jobs:
               pm2 start npm --name "my-next-app" -- start
             fi
             pm2 save 
-      - name: end script
-        run: |
-            EOF
+      #- name: end script
+       # run: |
+       #     EOF
