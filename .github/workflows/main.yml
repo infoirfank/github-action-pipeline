@@ -13,18 +13,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AWS_EC2_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-      - name: connect to EC2 Instance
+      - name: Set up SSH and connect to EC2 Instance
         env:
           HOST: ${{ secrets.AWS_EC2_HOST }}
           USER: ${{ secrets.AWS_EC2_USER }}
           PORT: ${{ secrets.EC2_PORT || 22 }}
         run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AWS_EC2_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -p $PORT $USER@$HOST << 'EOF'
         # Navigate to the project directory (create if not present)
             if [ ! -d "/home/ubuntu/my-next-app" ]; then
