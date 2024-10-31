@@ -1,65 +1,40 @@
-name: CI/CD Pipeline
+name: Next.js CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  setup:
+  build-test-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      # Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      # Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 'latest'
+          node-version: "20"
+          cache: "npm"
 
-      - name: Install dependencies
-        run: 
-          #npm install
-          echo "npm install..."
-          
+      # Install dependencies
+      - name: Install Dependencies
+        run: npm install
 
-  build:
-    runs-on: ubuntu-latest
-    needs: setup  # Ensure this job runs after the setup job
+      # Build project
+      - name: Build
+        run: npm run build
+        env:
+          NODE_ENV: production
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # Run tests
+      - name: Test
+        run: npm lint
 
-      - name: Build project
-        run: 
-          #npm run build
-          echo "npm run build..."
-
-  test:
-    runs-on: ubuntu-latest
-    needs: [setup,build]  # Ensure this job runs after the setup job
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Run tests
-        run: 
-          #npm run lint  # Make sure to use 'npm run lint' instead of 'npm lint'
-          echo "npm run lint..."
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: [build, test]  # Ensure this job runs after both build and test jobs
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Deploy to AWS EC2
+      # Deploy to AWS
+      - name: Deploy to AWS
         run: |
-          # Add your deployment script here
-          echo "Deploying to AWS EC2..."
-          # Example: scp or ssh commands to deploy your application
+          echo "Deploying to AWS EC2..." 
