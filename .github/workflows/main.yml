@@ -24,7 +24,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
 
           ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa -p $PORT $USER@$HOST << 'EOF'
-        # Navigate to the project directory (create if not present)
+          # Navigate to the project directory (create if not present)
             if [ ! -d "/home/ubuntu/my-next-app" ]; then
               mkdir -p /home/ubuntu/my-next-app
             fi
@@ -50,24 +50,24 @@ jobs:
         run: |
             npm install 
 
-        # Build the application
-        - name: Build the application 
-          run: |
-            npm run build
+      # Build the application
+      - name: Build the application 
+        run: |
+          npm run build
 
-        # Install PM2 if it's not already installed
-        #- name: Install PM2 if it's not already installed
-        #  run: |
-         #   npm install -g pm2
-
-        # Start the Next.js application
-        # Check if the app is already running and either restart or start
-        -name: Start the Next.js application
-          run: | 
-            if pm2 describe my-next-app > /dev/null; then
-              pm2 restart my-next-app
-            else
-              pm2 start npm --name "my-next-app" -- start
-            fi
-            pm2 save
+          # Install PM2 if it's not already installed
+          #- name: Install PM2 if it's not already installed
+          #  run: |
+           #   npm install -g pm2
+    
+      # Start the Next.js application
+      # Check if the app is already running and either restart or start
+      - name: Start the Next.js application
+        run: | 
+          if pm2 describe my-next-app > /dev/null; then
+            pm2 restart my-next-app
+          else
+            pm2 start npm --name "my-next-app" -- start
+          fi
+          pm2 save
           EOF
