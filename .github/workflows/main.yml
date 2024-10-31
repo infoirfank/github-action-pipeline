@@ -47,7 +47,7 @@ jobs:
             # Start the Next.js application
             # Check if the app is already running and either restart or start
             if pm2 describe my-next-app > /dev/null; then
-              pm2 restart my-next-app
+              pm2 restart all
             else
               pm2 start npm --name "my-next-app" -- start
             fi
