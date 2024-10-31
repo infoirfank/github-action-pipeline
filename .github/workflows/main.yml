@@ -31,25 +31,29 @@ jobs:
               mkdir -p /home/ubuntu/my-next-app
             fi
             cd /home/ubuntu/my-next-app
-
-            # Pull the latest changes
+            
+           # Pull the latest changes 
+      - name: upload latest changes
+        run: |
             git init
             git remote add origin https://github.com/infoirfank/github-action-pipeline.git || true
             git fetch origin main
             git reset --hard origin/main
-
-            # Install dependencies
+            
+      - name: Install dependencies
+        run: |
             npm install
 
-            # Build the application
-            npm run build
+      - name: Build the application
+        run: |
+          npm run build
 
-            # Start the Next.js application
-            # Check if the app is already running and either restart or start
+      - name: Start the Next.js application
+        run: |
             if pm2 describe my-next-app > /dev/null; then
               pm2 restart all
             else
               pm2 start npm --name "my-next-app" -- start
             fi
             pm2 save  # Save the process list
-          EOF
+            EOF
