@@ -32,35 +32,32 @@ jobs:
             fi
             cd /home/ubuntu/my-next-app
             
-           # Pull the latest changes 
-      - name: upload latest changes
-        run: |
+            # Pull the latest changes 
             git init
             git remote add origin https://github.com/infoirfank/github-action-pipeline.git || true
             git fetch origin main
             git reset --hard origin/main
             
-      - name: Install dependencies
-        run: |
+            # Install dependencies
             npm install
-
-      - name: Delete the current Build
-        run: |
-          rm -rf next
-          
-      - name: Build the application
-        run: |
-          npm run build
-
-      - name: Start the Next.js application
-        run: |
-            #npm install -g pm2
+            
+            # Delete the current build
+            rm -rf .next
+            
+            # Build the application
+            npm run build
+            
+            # Check if pm2 is installed, and install if not
+            if ! command -v pm2 &> /dev/null; then
+              npm install -g pm2
+            fi
+            
+            # Start or restart the Next.js application
             if pm2 describe my-next-app > /dev/null; then
-              pm2 restart all
+              pm2 restart my-next-app
             else
               pm2 start npm --name "my-next-app" -- start
             fi
-            pm2 save 
-      #- name: end script
-       # run: |
-       #     EOF
+            
+            pm2 save
+          EOF
