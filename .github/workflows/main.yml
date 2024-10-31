@@ -54,7 +54,7 @@ jobs:
 
       - name: Start the Next.js application
         run: |
-            npm install -g pm2
+            #npm install -g pm2
             if pm2 describe my-next-app > /dev/null; then
               pm2 restart all
             else
