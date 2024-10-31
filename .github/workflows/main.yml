@@ -32,9 +32,10 @@ jobs:
 
       # Run tests
       - name: Test
-        run: npm lint
+        run: npm run lint
 
       # Deploy to AWS
       - name: Deploy to AWS
         run: |
           echo "Deploying to AWS EC2..." 
+          npm run start
