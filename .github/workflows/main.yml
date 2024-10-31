@@ -20,7 +20,7 @@ jobs:
 
 
       - name: Create SSH key
-        run: echo "${{ secrets.AWS_EC2_KEY }}" > ec2_key.pem && chmod 400 ec2_key.pem
+        run: echo "${{ secrets.AWS_EC2_KEY }}" > nextapp.pem && chmod 400 nextapp.pem
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.2
